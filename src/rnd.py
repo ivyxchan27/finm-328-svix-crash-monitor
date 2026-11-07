@@ -171,23 +171,13 @@ def risk_neutral_cdf(surface_slice, rate, n_grid=N_GRID):
     0.0009
     """
     if abs(rate) >= 1.0:
-        raise ValueError(
-            f"rate must be a decimal fraction (e.g. 0.03 for 3%), got {rate!r}"
-        )
+        raise ValueError(f"rate must be a decimal fraction (e.g. 0.03 for 3%), got {rate!r}")
     grid, call_grid, maturity_years = priced_grid(surface_slice, rate, n_grid)
 
-    ## TODO: Breeden-Litzenberger. Compute `q_raw`, the raw risk-neutral CDF on
-    ## the grid, from the slope of the call curve in the strike. The docstring
-    ## above states the formula; `np.gradient(call_grid, grid)` is the slope.
-    q_raw = None
-    if q_raw is None:
-        raise NotImplementedError(
-            "Compute q_raw in risk_neutral_cdf (see HOMEWORK INSTRUCTIONS at the top of this file)"
-        )
+    r_f = np.exp(rate * maturity_years)
+    q_raw = 1.0 + r_f * np.gradient(call_grid, grid)
 
-    # A valid CDF is non-decreasing and lives in [0, 1]; the raw one need not be.
-    q_fit = np.clip(isotonic_regression(q_raw, increasing=True).x, 0.0, 1.0)
+    #a valid CDF is non-decreasing and lives in [0, 1]; the raw one need not be.
+    q_fit = np.clip(isotonic_regression(q_raw, increasing = True).x, 0.0, 1.0)
 
-    return RiskNeutralCDF(
-        grid, q_fit, call_grid=call_grid, maturity_years=maturity_years, rate=rate
-    )
+    return RiskNeutralCDF(grid, q_fit, call_grid=call_grid, maturity_years = maturity_years, rate = rate)

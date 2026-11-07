@@ -23,9 +23,10 @@ description = "From settlement prices to the simple variance swap rate, the risk
 path = "_output/02_svix_and_crash_probability_ipynb.ipynb"
 
 
-# TODO: Register the monitor notebook, `03_daily_monitor_ipynb`, following
-# the two entries above: a name, a description, and the path of the executed
-# notebook that `doit` leaves in `_output/`.
+[notebooks.03_daily_monitor_ipynb]
+name = "The Daily Monitor"
+description = "SVIX and the probability of a crash, recomputed every morning by a GitHub Actions workflow: the schedule, the Databento secret, the history kept on the monitor-history branch, and the page deployed to gh-pages."
+path = "_output/03_daily_monitor_ipynb.ipynb"
 
 
 [notebooks.04_single_name_crash_bounds_ipynb]
@@ -53,13 +54,27 @@ window in the settings again when it changes; `doit latest` pulls the most
 recent session."""
 
 
-# TODO: Register the monitor's history as `[dataframes.svix_monitor_history]`,
-# following the entry above. It is the CSV in `_output/` that
-# `src/monitor.py` writes, and that the deploy workflow keeps on the
-# `monitor-history` branch. Document it: a name, a description, the path,
-# which column holds the date (`date_col`), how it is produced, and what a
-# reader needs to know (`docs`). The chart below refers to this entry by
-# name, so the site does not build until it exists.
+[dataframes.svix_monitor_history]
+name = "SVIX and Crash Probability Monitor History"
+description = "One row per session: the 30-day SVIX interpolated between the two end-of-month E-mini expirations that bracket 30 days, the VIX, and the risk-neutral, log-utility, and power-utility probabilities of a 10% and a 20% drop"
+path = "_output/svix_monitor_history.csv"
+date_col = "date"
+tags = ["Options", "Volatility", "Monitor"]
+pull_method = "Computed by src/monitor.py from the Databento settlements and FRED; appended daily by `doit latest`"
+docs = """One row per session, oldest first. `src/monitor.py` appends a row
+for every session the history does not have yet: `doit` over the window in
+the settings (the backfill), `doit latest` for the most recent session (the
+daily update). The deploy workflow keeps the CSV on the `monitor-history`
+branch between runs, so it is never committed to `main`.
+
+Columns: `date`; `near_expiry`, `far_expiry`, `days_near`, `days_far` (the
+two expirations bracketing 30 days); `forward_near` (the parity-implied
+futures price); `rate` (DGS1MO, decimal); `svix2_near`, `svix2_far`
+(annualized SVIX^2); `svix2_30`, `svix_30` (the 30-day index, `svix_30` in
+VIX units); `days_used` (the expiry the probabilities are read from);
+`p_star_20`, `p_log_20`, `p_power_20` (risk-neutral, log-utility, and
+power-utility probabilities of a 20% drop); `p_star_10`, `p_log_10`; `vix`
+(the Cboe VIX close from FRED, empty until FRED posts it)."""
 
 
 [charts]
